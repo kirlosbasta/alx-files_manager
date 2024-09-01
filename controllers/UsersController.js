@@ -1,9 +1,5 @@
-import { ObjectId } from 'mongodb';
 import dbClient from '../utils/db';
-import redisClient from '../utils/redis';
 import { checkUser, hashPassword } from '../utils/auth';
-
-const Unauthorized = { error: 'Unauthorized' };
 
 export async function postNew(req, res) {
   const { email, password } = req.body;
@@ -26,21 +22,6 @@ export async function postNew(req, res) {
 }
 
 export async function getMe(req, res) {
-  const { 'x-token': token } = req.headers;
-  const key = `auth_${token}`;
-  if (!token) {
-    return res.status(401).json(Unauthorized);
-  }
-  const id = await redisClient.get(key);
-  if (!id) {
-    return res.status(401).json(Unauthorized);
-  }
-  const user = await dbClient.users.findOne(
-    { _id: new ObjectId(id) },
-    { projection: { password: 0 } },
-  );
-  if (!user) {
-    return res.status(401).json(Unauthorized);
-  }
-  return res.json(user);
+  const { user } = req;
+  return res.json({ id: user._id, email: user.email });
 }

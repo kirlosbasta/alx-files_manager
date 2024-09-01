@@ -1,7 +1,11 @@
+import { ObjectId } from 'mongodb';
 import dbClient from '../utils/db';
-import { checkUser, hashPassword } from '../utils/users';
+import redisClient from '../utils/redis';
+import { checkUser, hashPassword } from '../utils/auth';
 
-export default async function postNew(req, res) {
+const Unauthorized = { error: 'Unauthorized' };
+
+export async function postNew(req, res) {
   const { email, password } = req.body;
   if (!email) {
     return res.status(400).json({ error: 'Missing email' });
@@ -19,4 +23,24 @@ export default async function postNew(req, res) {
     password: hashedPassword,
   });
   return res.status(201).json({ id: newUser.insertedId, email });
+}
+
+export async function getMe(req, res) {
+  const { 'x-token': token } = req.headers;
+  const key = `auth_${token}`;
+  if (!token) {
+    return res.status(401).json(Unauthorized);
+  }
+  const id = await redisClient.get(key);
+  if (!id) {
+    return res.status(401).json(Unauthorized);
+  }
+  const user = await dbClient.users.findOne(
+    { _id: new ObjectId(id) },
+    { projection: { password: 0 } },
+  );
+  if (!user) {
+    return res.status(401).json(Unauthorized);
+  }
+  return res.json(user);
 }

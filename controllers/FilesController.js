@@ -41,14 +41,16 @@ export default async function postUpload(req, res) {
   if (type === 'folder') {
     const folder = await dbClient.files.insertOne({ ...result });
     console.log(result);
-    res.status(201).json({ id: folder.insertedId.toString(), ...result });
-  } else {
-    const filePath = createFile(folerPath, data);
-    const file = await dbClient.files.insertOne({
-      ...result,
-      localPath: filePath,
-    });
-    console.log(result);
-    return res.status(201).json({ id: file.insertedId.toString(), ...result });
+    return res
+      .status(201)
+      .json({ id: folder.insertedId.toString(), ...result });
   }
+
+  const filePath = createFile(folerPath, data);
+  const file = await dbClient.files.insertOne({
+    ...result,
+    localPath: filePath,
+  });
+  console.log(result);
+  return res.status(201).json({ id: file.insertedId.toString(), ...result });
 }

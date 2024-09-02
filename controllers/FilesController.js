@@ -50,6 +50,7 @@ export default async function postUpload(req, res) {
       isPublic,
       localPath: filePath,
     });
-    return res.status(201).json(file.ops[0]);
+    const { localPath, ...rest } = file.ops[0];
+    return res.status(201).json(rest);
   }
 }

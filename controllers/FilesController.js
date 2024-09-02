@@ -3,7 +3,7 @@ import { ObjectId } from 'mongodb';
 import dbClient from '../utils/db';
 import createFile from '../utils/crud';
 
-export default async function postUpload(req, res) {
+async function postUpload(req, res) {
   const { user } = req;
   const TYPES = ['folder', 'file', 'image'];
   const folerPath = process.env.FOLDER_PATH || '/tmp/files_manager';
@@ -52,3 +52,37 @@ export default async function postUpload(req, res) {
   });
   return res.status(201).json({ id: file.insertedId.toString(), ...result });
 }
+
+async function getShow(req, res) {
+  const { user } = req;
+  const { id } = req.params;
+  const file = await dbClient.files.findOne({
+    _id: new ObjectId(id),
+    userId: user._id.toString(),
+  });
+  if (!file) return res.status(404).json({ error: 'Not found' });
+  const { _id: fileId, localPath, ...rest } = file;
+  return res.status(200).json({ id: fileId, ...rest });
+}
+
+async function getIndex(req, res) {
+  const { user } = req;
+  let { parentId, page } = req.query;
+  const limit = 20;
+  parentId = parentId || 0;
+  page = parseInt(page, 10) || 0;
+  const skip = page * limit;
+  const files = await dbClient.files.aggregate([
+    { $match: { userId: user._id.toString(), parentId } },
+    { $skip: skip },
+    { $limit: limit },
+  ]);
+  const results = [];
+  for await (const file of files) {
+    const { _id: id, localPath, ...rest } = file;
+    results.push({ id, ...rest });
+  }
+  return res.status(200).json(results);
+}
+
+export { postUpload, getShow, getIndex };

@@ -74,7 +74,7 @@ async function getIndex(req, res) {
   if (!page) page = 0;
   const skip = page * limit;
   const files = await dbClient.files.aggregate([
-    { $match: { userId: user._id.toString(), parentId } },
+    { $match: { parentId } },
     { $skip: skip },
     { $limit: limit },
   ]);

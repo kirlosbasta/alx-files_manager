@@ -33,13 +33,6 @@ export async function getConnect(req, res) {
 export async function getDisconnect(req, res) {
   const { 'x-token': token } = req.headers;
   const key = `auth_${token}`;
-  if (!token) {
-    return res.status(401).json(Unauthorized);
-  }
-  const id = await redisClient.get(key);
-  if (!id) {
-    return res.status(401).json(Unauthorized);
-  }
   await redisClient.del(key);
   return res.status(204).send();
 }

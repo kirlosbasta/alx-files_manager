@@ -65,25 +65,24 @@ async function getShow(req, res) {
   return res.status(200).json({ id: fileId, ...rest });
 }
 
-async function getIndex(req, res) {
-  const { user } = req;
-  let { parentId, page } = req.query;
-  const limit = 20;
-  if (!parentId) parentId = 0;
-  page = parseInt(page, 10);
-  if (!page) page = 0;
-  const skip = page * limit;
-  const files = await dbClient.files.aggregate([
-    { $match: { parentId } },
-    { $skip: skip },
-    { $limit: limit },
-  ]);
-  const results = [];
-  for await (const file of files) {
-    const { _id: id, localPath, ...rest } = file;
-    results.push({ id, ...rest });
-  }
-  return res.status(200).json(results);
-}
+// async function getIndex(req, res) {
+//   const { user } = req;
+//   let { parentId, page } = req.query;
+//   const limit = 20;
+//   parentId = parentId || 0;
+//   page = parseInt(page, 10) || 0;
+//   const skip = page * limit;
+//   const files = await dbClient.files.aggregate([
+//     { $match: { parentId } },
+//     { $skip: skip },
+//     { $limit: limit },
+//   ]);
+//   const results = [];
+//   for await (const file of files) {
+//     const { _id: id, localPath, ...rest } = file;
+//     results.push({ id, ...rest });
+//   }
+//   return res.status(200).json(results);
+// }
 
-export { postUpload, getShow, getIndex };
+export { postUpload, getShow };

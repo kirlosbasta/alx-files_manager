@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb';
-import redisClient from './redis';
-import dbClient from './db';
+import redisClient from '../utils/redis';
+import dbClient from '../utils/db';
 
 const Unauthorized = { error: 'Unauthorized' };
 
@@ -14,7 +14,7 @@ export default async function authenticate(req, res, next) {
   if (!id) {
     return res.status(401).json(Unauthorized);
   }
-  const user = await dbClient.users.findOne({ _id: ObjectId(id) });
+  const user = await dbClient.users.findOne({ _id: new ObjectId(id) });
   if (!user) {
     return res.status(401).json(Unauthorized);
   }

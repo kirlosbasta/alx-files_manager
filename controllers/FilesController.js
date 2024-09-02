@@ -3,7 +3,7 @@ import { ObjectId } from 'mongodb';
 import dbClient from '../utils/db';
 import createFile from '../utils/crud';
 
-export async function postUpload(req, res) {
+export default async function postUpload(req, res) {
   const { user } = req;
   const TYPES = ['folder', 'file', 'image'];
   const folerPath = process.env.FOLDER_PATH || '/tmp/files_manager';

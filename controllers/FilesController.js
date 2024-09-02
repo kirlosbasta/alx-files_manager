@@ -1,4 +1,4 @@
-import fs from 'node:fs';
+import fs from 'fs';
 import { ObjectId } from 'mongodb';
 import dbClient from '../utils/db';
 import createFile from '../utils/crud';
@@ -40,7 +40,6 @@ export default async function postUpload(req, res) {
   };
   if (type === 'folder') {
     const folder = await dbClient.files.insertOne({ ...result });
-    console.log(result);
     return res
       .status(201)
       .json({ id: folder.insertedId.toString(), ...result });
@@ -51,6 +50,5 @@ export default async function postUpload(req, res) {
     ...result,
     localPath: filePath,
   });
-  console.log(result);
   return res.status(201).json({ id: file.insertedId.toString(), ...result });
 }

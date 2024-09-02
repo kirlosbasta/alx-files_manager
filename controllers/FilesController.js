@@ -31,26 +31,24 @@ export default async function postUpload(req, res) {
       return res.status(400).json({ error: 'Parent is not a folder' });
     }
   }
+  const result = {
+    userId: user._id.toString(),
+    name,
+    type,
+    parentId,
+    isPublic,
+  };
   if (type === 'folder') {
-    const folder = await dbClient.files.insertOne({
-      userId: user._id.toString(),
-      name,
-      type,
-      parentId,
-      isPublic,
-    });
-    res.status(201).json(folder.ops[0]);
+    const folder = await dbClient.files.insertOne({ ...result });
+    console.log(result);
+    res.status(201).json({ id: folder.insertedId.toString(), ...result });
   } else {
     const filePath = createFile(folerPath, data);
     const file = await dbClient.files.insertOne({
-      userId: user._id.toString(),
-      name,
-      type,
-      parentId,
-      isPublic,
+      ...result,
       localPath: filePath,
     });
-    const { localPath, ...rest } = file.ops[0];
-    return res.status(201).json(rest);
+    console.log(result);
+    return res.status(201).json({ id: file.insertedId.toString(), ...result });
   }
 }

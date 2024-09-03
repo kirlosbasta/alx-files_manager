@@ -8,6 +8,7 @@ import {
   getIndex,
   putPublish,
   putUnpublish,
+  getFile,
 } from '../controllers/FilesController';
 import authenticate from '../middleware/authenticate';
 import checkFile from '../middleware/files';
@@ -25,5 +26,6 @@ router.get('/files/:id', authenticate, getShow);
 router.get('/files', authenticate, getIndex);
 router.put('/files/:id/publish', authenticate, checkFile, putPublish);
 router.put('/files/:id/unpublish', authenticate, checkFile, putUnpublish);
+router.get('/files/:id/data', getFile);
 
 export default router;

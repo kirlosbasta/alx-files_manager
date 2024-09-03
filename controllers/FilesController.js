@@ -1,7 +1,9 @@
 import fs from 'fs';
+import mimeType from 'mime-types';
 import { ObjectId } from 'mongodb';
 import dbClient from '../utils/db';
 import { createFile, processFile } from '../utils/crud';
+import { getUser } from '../utils/auth';
 
 async function postUpload(req, res) {
   const { user } = req;
@@ -114,10 +116,37 @@ async function putUnpublish(req, res) {
   return res.status(200).json(processFile(newFile));
 }
 
+async function getFile(req, res) {
+  const user = await getUser(req);
+  const { id } = req.params;
+  try {
+    const file = await dbClient.files.findOne({ _id: new ObjectId(id) });
+    if (!file) return res.status(404).json({ error: 'Not found' });
+    if (
+      file.isPublic === false
+      && (!user || user._id.toString() !== file.userId)
+    ) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+    if (file.type === 'folder') {
+      return res.status(400).json({ error: "A folder doesn't have content" });
+    }
+    if (!fs.existsSync(file.localPath)) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+    const data = fs.readFileSync(file.localPath);
+    const mime = mimeType.lookup(file.name);
+    res.type(mime);
+    return res.status(200).send(data);
+  } catch (err) {
+    return res.status(404).json({ error: 'Not found' });
+  }
+}
 export {
   postUpload,
   getShow,
   getIndex,
   putPublish,
   putUnpublish,
+  getFile,
 };

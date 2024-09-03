@@ -1,5 +1,24 @@
 import { createHash } from 'crypto';
+import { ObjectId } from 'mongodb';
 import dbClient from './db';
+import redisClient from './redis';
+
+async function getUser(req) {
+  const { 'x-token': token } = req.headers;
+  const key = `auth_${token}`;
+  if (!token) {
+    return null;
+  }
+  const id = await redisClient.get(key);
+  if (!id) {
+    return null;
+  }
+  const user = await dbClient.users.findOne({ _id: new ObjectId(id) });
+  if (!user) {
+    return null;
+  }
+  return user;
+}
 
 async function checkUser(email) {
   if (!email) {
@@ -40,6 +59,7 @@ function comparePasswords(password, hash) {
 }
 
 export {
+  getUser,
   checkUser,
   hashPassword,
   encodeBase64,

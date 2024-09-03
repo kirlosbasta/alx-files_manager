@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { ObjectId } from 'mongodb';
 import dbClient from '../utils/db';
-import createFile from '../utils/crud';
+import { createFile, processFile } from '../utils/crud';
 
 async function postUpload(req, res) {
   const { user } = req;
@@ -61,12 +61,10 @@ async function getShow(req, res) {
     userId: user._id.toString(),
   });
   if (!file) return res.status(404).json({ error: 'Not found' });
-  const { _id: fileId, localPath, ...rest } = file;
-  return res.status(200).json({ id: fileId, ...rest });
+  return res.status(200).json(processFile(file));
 }
 
 async function getIndex(req, res) {
-  // const { user } = req;
   let { parentId, page } = req.query;
   const limit = 20;
   parentId = parentId || 0;
@@ -79,8 +77,7 @@ async function getIndex(req, res) {
   ]);
   const results = [];
   for await (const file of files) {
-    const { _id: id, localPath, ...rest } = file;
-    results.push({ id, ...rest });
+    results.push(processFile(file));
   }
   return res.status(200).json(results);
 }

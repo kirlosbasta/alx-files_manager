@@ -134,14 +134,13 @@ async function getFile(req, res) {
     if (!fs.existsSync(file.localPath)) {
       return res.status(404).json({ error: 'Not found' });
     }
-    const data = fs.readFileSync(file.localPath);
     const mime = mimeType.lookup(file.name);
-    res.type(mime);
-    return res.status(200).send(data);
+    return res.status(200).type(mime).sendFile(file.localPath);
   } catch (err) {
     return res.status(404).json({ error: 'Not found' });
   }
 }
+
 export {
   postUpload,
   getShow,

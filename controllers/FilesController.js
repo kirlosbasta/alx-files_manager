@@ -56,24 +56,34 @@ async function postUpload(req, res) {
 async function getShow(req, res) {
   const { user } = req;
   const { id } = req.params;
-  const file = await dbClient.files.findOne({
-    _id: new ObjectId(id),
-    userId: user._id.toString(),
-  });
-  if (!file) return res.status(404).json({ error: 'Not found' });
-  return res.status(200).json(processFile(file));
+  try {
+    const file = await dbClient.files.findOne({
+      _id: new ObjectId(id),
+      userId: user._id.toString(),
+    });
+    if (!file) return res.status(404).json({ error: 'Not found' });
+    return res.status(200).json(processFile(file));
+  } catch (err) {
+    return res.status(404).json({ error: 'Not found' });
+  }
 }
 
 async function getIndex(req, res) {
   let { parentId, page } = req.query;
   const limit = 20;
-  parentId = parentId || 0;
   page = parseInt(page, 10) || 0;
   const skip = page * limit;
   const query = {};
-  if (parentId !== 0) query.parentId = parentId;
-  const parentFolder = await dbClient.files.findOne({ parentId, type: 'folder' });
-  if (!parentFolder) return res.status(200).json([]);
+  if (parentId && parentId !== '0') {
+    const parentFolder = await dbClient.files.findOne({
+      _id: new ObjectId(parentId),
+      type: 'folder',
+    });
+    console.log(parentFolder);
+    if (!parentFolder) return res.status(200).json([]);
+  }
+  if (parentId === '0') parentId = 0;
+  if (parentId) query.parentId = parentId;
   const files = await dbClient.files.aggregate([
     { $match: query },
     { $skip: skip },

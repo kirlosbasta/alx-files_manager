@@ -65,12 +65,13 @@ async function getShow(req, res) {
 }
 
 async function getIndex(req, res) {
+  const { user } = req;
   let { parentId, page } = req.query;
   const limit = 20;
   parentId = parentId || 0;
   page = parseInt(page, 10) || 0;
   const skip = page * limit;
-  const query = {};
+  const query = { userId: user._id.toString() };
   if (parentId !== 0) query.parentId = parentId;
   const files = await dbClient.files.aggregate([
     { $match: query },

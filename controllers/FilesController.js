@@ -84,4 +84,29 @@ async function getIndex(req, res) {
   return res.status(200).json(results);
 }
 
-export { postUpload, getShow, getIndex };
+async function putPublish(req, res) {
+  const { id } = req.params;
+  await dbClient.files.updateOne(
+    { _id: new ObjectId(id) },
+    { $set: { isPublic: true } },
+  );
+  const file = await dbClient.files.findOne({ _id: new ObjectId(id) });
+  return res.status(200).json(processFile(file));
+}
+async function putUnpublish(req, res) {
+  const { id } = req.params;
+  await dbClient.files.updateOne(
+    { _id: new ObjectId(id) },
+    { $set: { isPublic: false } },
+  );
+  const file = await dbClient.files.findOne({ _id: new ObjectId(id) });
+  return res.status(200).json(processFile(file));
+}
+
+export {
+  postUpload,
+  getShow,
+  getIndex,
+  putPublish,
+  putUnpublish,
+};

@@ -53,17 +53,17 @@ async function postUpload(req, res) {
   return res.status(201).json({ id: file.insertedId.toString(), ...result });
 }
 
-// async function getShow(req, res) {
-//   const { user } = req;
-//   const { id } = req.params;
-//   const file = await dbClient.files.findOne({
-//     _id: new ObjectId(id),
-//     userId: user._id.toString(),
-//   });
-//   if (!file) return res.status(404).json({ error: 'Not found' });
-//   const { _id: fileId, localPath, ...rest } = file;
-//   return res.status(200).json({ id: fileId, ...rest });
-// }
+async function getShow(req, res) {
+  const { user } = req;
+  const { id } = req.params;
+  const file = await dbClient.files.findOne({
+    _id: new ObjectId(id),
+    userId: user._id.toString(),
+  });
+  if (!file) return res.status(404).json({ error: 'Not found' });
+  const { _id: fileId, localPath, ...rest } = file;
+  return res.status(200).json({ id: fileId, ...rest });
+}
 
 async function getIndex(req, res) {
   // const { user } = req;
@@ -85,4 +85,4 @@ async function getIndex(req, res) {
   return res.status(200).json(results);
 }
 
-export { postUpload, getIndex };
+export { postUpload, getShow, getIndex };

@@ -101,8 +101,8 @@ async function putPublish(req, res) {
     { _id: new ObjectId(id) },
     { $set: { isPublic: true } },
   );
-  const file = await dbClient.files.findOne({ _id: new ObjectId(id) });
-  return res.status(200).json(processFile(file));
+  const newFile = await dbClient.files.findOne({ _id: new ObjectId(id) });
+  return res.status(200).json(processFile(newFile));
 }
 async function putUnpublish(req, res) {
   const { id } = req.params;
@@ -110,8 +110,8 @@ async function putUnpublish(req, res) {
     { _id: new ObjectId(id) },
     { $set: { isPublic: false } },
   );
-  const file = await dbClient.files.findOne({ _id: new ObjectId(id) });
-  return res.status(200).json(processFile(file));
+  const newFile = await dbClient.files.findOne({ _id: new ObjectId(id) });
+  return res.status(200).json(processFile(newFile));
 }
 
 export {

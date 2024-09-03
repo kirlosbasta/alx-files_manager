@@ -79,7 +79,6 @@ async function getIndex(req, res) {
       _id: new ObjectId(parentId),
       type: 'folder',
     });
-    console.log(parentFolder);
     if (!parentFolder) return res.status(200).json([]);
   }
   if (parentId === '0') parentId = 0;

@@ -49,7 +49,7 @@ function decodeBase64(base64) {
  */
 function parseAuthorization(authString) {
   const base64 = authString.slice(6);
-  const decoded = decodeBase64(base64);
+  const decoded = decodeBase64(base64).toString('utf-8');
   return decoded.split(':');
 }
 

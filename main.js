@@ -1,12 +1,7 @@
-import redisClient from './utils/redis';
+import thumbnail from 'image-thumbnail';
+import fs from 'fs';
 
 (async () => {
-  console.log(redisClient.isAlive());
-  console.log(await redisClient.get('myKey'));
-  await redisClient.set('myKey', 12, 5);
-  console.log(await redisClient.get('myKey'));
-
-  setTimeout(async () => {
-    console.log(await redisClient.get('myKey'));
-  }, 1000 * 10);
+  const thumb = await thumbnail(data, { width: 250 });
+  fs.writeFileSync('image_250', thumb);
 })();

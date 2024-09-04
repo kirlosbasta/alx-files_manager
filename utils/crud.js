@@ -6,7 +6,7 @@ import { decodeBase64 } from './auth';
 export function createFile(dirname, data) {
   const filePath = path.join(dirname, v4());
   const clearData = decodeBase64(data);
-  fs.writeFileSync(filePath, clearData, 'utf-8');
+  fs.writeFileSync(filePath, clearData);
   return filePath;
 }
 

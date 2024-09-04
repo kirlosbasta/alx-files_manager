@@ -1,9 +1,12 @@
 import fs from 'fs';
 import mimeType from 'mime-types';
+import Bull from 'bull';
 import { ObjectId } from 'mongodb';
 import dbClient from '../utils/db';
 import { createFile, processFile } from '../utils/crud';
 import { getUser } from '../utils/auth';
+
+const fileQueue = new Bull('fileQueue');
 
 async function postUpload(req, res) {
   const { user } = req;
@@ -52,6 +55,12 @@ async function postUpload(req, res) {
     ...result,
     localPath: filePath,
   });
+  if (result.type === 'image') {
+    await fileQueue.add({
+      userId: user._id.toString(),
+      fileId: file.insertedId.toString(),
+    });
+  }
   return res.status(201).json({ id: file.insertedId.toString(), ...result });
 }
 
@@ -119,14 +128,15 @@ async function putUnpublish(req, res) {
 async function getFile(req, res) {
   const user = await getUser(req);
   const { id } = req.params;
+  let { size } = req.query;
+  size = parseInt(size, 10);
   try {
     const file = await dbClient.files.findOne({ _id: new ObjectId(id) });
     if (!file) return res.status(404).json({ error: 'Not found' });
-    if (
-      file.isPublic === false
-      && (!user || user._id.toString() !== file.userId)
-    ) {
-      return res.status(404).json({ error: 'Not found' });
+    if (file.isPublic === false) {
+      if (!user || user._id.toString() !== file.userId) {
+        return res.status(404).json({ error: 'Not found' });
+      }
     }
     if (file.type === 'folder') {
       return res.status(400).json({ error: "A folder doesn't have content" });
@@ -134,8 +144,17 @@ async function getFile(req, res) {
     if (!fs.existsSync(file.localPath)) {
       return res.status(404).json({ error: 'Not found' });
     }
+    let path = file.localPath;
+    if (size) {
+      const thumbPath = `${file.localPath}_${size}`;
+      if (!fs.existsSync(thumbPath)) {
+        return res.status(404).json({ error: 'Not found' });
+      }
+      path = thumbPath;
+    }
     const mime = mimeType.lookup(file.name);
-    return res.status(200).type(mime).sendFile(file.localPath);
+    const data = fs.readFileSync(path);
+    return res.status(200).type(mime).send(data);
   } catch (err) {
     return res.status(404).json({ error: 'Not found' });
   }

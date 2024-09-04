@@ -1,5 +1,8 @@
+import Bull from 'bull';
 import dbClient from '../utils/db';
 import { checkUser, hashPassword } from '../utils/auth';
+
+const userQueue = new Bull('userQueue');
 
 export async function postNew(req, res) {
   const { email, password } = req.body;
@@ -18,6 +21,7 @@ export async function postNew(req, res) {
     email,
     password: hashedPassword,
   });
+  await userQueue.add({ userId: newUser.insertedId.toString() });
   return res.status(201).json({ id: newUser.insertedId, email });
 }
 

@@ -25,6 +25,7 @@ async function postUpload(req, res) {
   }
   fs.mkdirSync(folerPath, { recursive: true });
 
+  if (parentId === '0') parentId = 0;
   if (parentId) {
     const parentFolder = await dbClient.files.findOne({
       _id: new ObjectId(parentId),

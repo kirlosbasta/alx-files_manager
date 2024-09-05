@@ -134,7 +134,7 @@ async function getFile(req, res) {
     const file = await dbClient.files.findOne({ _id: new ObjectId(id) });
     if (!file) return res.status(404).json({ error: 'Not found' });
     if (file.isPublic === false) {
-      if (!user || user._id.toString() !== file.userId) {
+      if (!user || user._id.toString() !== file.userId.toString()) {
         return res.status(404).json({ error: 'Not found' });
       }
     }

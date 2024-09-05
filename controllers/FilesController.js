@@ -38,7 +38,7 @@ async function postUpload(req, res) {
     }
   }
   const result = {
-    userId: user._id.toString(),
+    userId: user._id,
     name,
     type,
     parentId,
@@ -71,7 +71,7 @@ async function getShow(req, res) {
   try {
     const file = await dbClient.files.findOne({
       _id: new ObjectId(id),
-      userId: user._id.toString(),
+      userId: user._id,
     });
     if (!file) return res.status(404).json({ error: 'Not found' });
     return res.status(200).json(processFile(file));

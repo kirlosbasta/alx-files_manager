@@ -13,11 +13,15 @@ async function getUser(req) {
   if (!id) {
     return null;
   }
-  const user = await dbClient.users.findOne({ _id: new ObjectId(id) });
-  if (!user) {
+  try {
+    const user = await dbClient.users.findOne({ _id: new ObjectId(id) });
+    if (!user) {
+      return null;
+    }
+    return user;
+  } catch (error) {
     return null;
   }
-  return user;
 }
 
 async function checkUser(email) {

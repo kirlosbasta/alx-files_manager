@@ -15,7 +15,7 @@ async function postUpload(req, res) {
   const { name, type, data } = req.body;
   let { parentId, isPublic } = req.body;
   isPublic = isPublic || false;
-  parentId = parentId || 0;
+  parentId = parentId && parentId !== '0' ? new ObjectId(parentId) : 0;
   if (!name) return res.status(400).json({ error: 'Missing name' });
   if (!TYPES.includes(type)) {
     return res.status(400).json({ error: 'Missing type' });
@@ -25,10 +25,9 @@ async function postUpload(req, res) {
   }
   fs.mkdirSync(folerPath, { recursive: true });
 
-  if (parentId === '0') parentId = 0;
   if (parentId) {
     const parentFolder = await dbClient.files.findOne({
-      _id: new ObjectId(parentId),
+      _id: parentId,
     });
     if (!parentFolder) {
       return res.status(400).json({ error: 'Parent not found' });
@@ -84,16 +83,16 @@ async function getIndex(req, res) {
   let { parentId, page } = req.query;
   const limit = 20;
   page = parseInt(page, 10) || 0;
+  parentId = parentId && parentId !== '0' ? new ObjectId(parentId) : 0;
   const skip = page * limit;
   const query = {};
-  if (parentId && parentId !== '0') {
+  if (parentId) {
     const parentFolder = await dbClient.files.findOne({
-      _id: new ObjectId(parentId),
+      _id: parentId,
       type: 'folder',
     });
     if (!parentFolder) return res.status(200).json([]);
   }
-  if (parentId === '0') parentId = 0;
   if (parentId) query.parentId = parentId;
   const files = await dbClient.files.aggregate([
     { $match: query },

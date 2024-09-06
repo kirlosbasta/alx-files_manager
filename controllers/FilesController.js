@@ -154,7 +154,8 @@ async function getFile(req, res) {
     }
     const mime = mimeType.lookup(file.name);
     const data = fs.readFileSync(path);
-    return res.status(200).type(mime).send(data);
+    res.setHeader('Content-Type', mime);
+    return res.status(200).send(data);
   } catch (err) {
     return res.status(404).json({ error: 'Not found' });
   }
